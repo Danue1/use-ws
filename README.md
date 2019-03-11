@@ -2,9 +2,7 @@
 
 A pretty custom hooks for websocket and react.
 
-- binary support only
-
-  - no plan: blob support
+- type-safe!
 
 # Install
 

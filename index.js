@@ -1,9 +1,9 @@
 import { EventEmitter } from 'eventemitter3'
-import React, { createContext, useContext, useEffect, useState, createElement } from 'react'
+import { createContext, useContext, useEffect, useState, createElement } from 'react'
 
-export const PacketType = {
-  ArrayBuffer: 'ArrayBuffer',
-  Blob: 'Blob'
+export const BinaryType = {
+  ArrayBuffer: 'arraybuffer',
+  Blob: 'blob'
 }
 
 export const createWebSocket = ({ binaryType, encode, decode }) => {
@@ -22,7 +22,8 @@ export const createWebSocket = ({ binaryType, encode, decode }) => {
       nextWebSocket.onerror = onError
       nextWebSocket.onclose = onClose
       nextWebSocket.onmessage = ({ data: packet }) => {
-        const { action, data } = decode(packet)
+        const decodedPacket = decode(packet)
+        const { action, data } = decodedPacket || {}
         if (!action) {
           return
         }
@@ -77,7 +78,7 @@ export const createWebSocket = ({ binaryType, encode, decode }) => {
 
   return {
     useWebSocket: () => useContext(Context),
-    Consumer: Context.Consumer,
-    Provider
+    WebSocketConsumer: Context.Consumer,
+    WebSocketProvider: Provider
   }
 }

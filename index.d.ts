@@ -1,31 +1,50 @@
-import { ExoticComponent, ConsumerProps } from 'react'
+import { ConsumerProps, ExoticComponent, FC } from 'react'
 
-export enum PacketType {
-  ArrayBuffer = 'ArrayBuffer',
-  Blob = 'Blob'
+export enum BinaryType {
+  ArrayBuffer = 'arraybuffer',
+  Blob = 'blob'
 }
 
-export type Packet = string | ArrayBufferLike | Blob | ArrayBufferView
-export type Encode = (action: any, ...args: any[]) => Packet
-export type Decode<BinaryType extends PacketType> = (
-  packet: string | (BinaryType extends PacketType.ArrayBuffer ? ArrayBuffer : Blob)
-) => DecodedPacket
+type BinaryKind = 'arraybuffer' | 'blob'
 
+export const createWebSocket: <Binary extends BinaryKind>(
+  option: Option<Binary>
+) => {
+  readonly useWebSocket: () => WebSocketContext
+  readonly WebSocketConsumer: ExoticComponent<ConsumerProps<WebSocketContext>>
+  readonly WebSocketProvider: FC<Props>
+}
+
+export interface Option<Binary extends BinaryKind> {
+  readonly binaryType: Binary
+  readonly encode: Encode
+  readonly decode: Decode<Binary>
+}
+
+export type Encode = (action: any, ...args: any[]) => string | ArrayBufferLike | Blob | ArrayBufferView
+export type Decode<Binary extends BinaryKind> = (
+  packet: string | (Binary extends 'arraybuffer' ? ArrayBuffer : Blob)
+) => void | DecodedPacket
 export interface DecodedPacket {
   readonly action: any
   readonly data: any[]
 }
 
-export interface Option<BinaryType extends PacketType> {
-  readonly binaryType: BinaryType
-  readonly encode: Encode
-  readonly decode: Decode<BinaryType>
+export interface WebSocketContext {
+  readonly remove: Remove
+  readonly receive: Receive
+  readonly receiveOnce: ReceiveOnce
+  readonly request: Request
+  readonly refresh: Refresh
 }
 
-export type Middleware = (action: string, ...data: any[]) => void
-export type OnOpen = (event: Event) => void
-export type OnError = (event: Event) => void
-export type OnClose = (event: CloseEvent) => void
+export type Handler = (...args: any[]) => void
+export type Handle = (action: any, handler: Handler) => WebSocketContext
+export type Remove = Handle
+export type Receive = Handle
+export type ReceiveOnce = Handle
+export type Request = (...data: any[]) => WebSocketContext
+export type Refresh = () => void
 
 export interface Props {
   readonly url: string
@@ -35,26 +54,7 @@ export interface Props {
   readonly onClose?: OnClose
 }
 
-export type Handler = (...args: any[]) => void
-export type Handle = (action: any, handler: Handler) => Context
-export type Remove = Handle
-export type Receive = Handle
-export type ReceiveOnce = Handle
-export type Request = (...data: any[]) => Context
-export type Refresh = () => void
-
-export interface Context {
-  readonly remove: Remove
-  readonly receive: Receive
-  readonly receiveOnce: ReceiveOnce
-  readonly request: Request
-  readonly refresh: Refresh
-}
-
-export const createWebSocket: <BinaryType extends PacketType>(
-  option: Option<BinaryType>
-) => {
-  readonly useWebSocket: () => Context
-  readonly Consumer: ExoticComponent<ConsumerProps<Context>>
-  readonly Provider: FC<Props>
-}
+export type Middleware = (action: string, ...data: any[]) => void
+export type OnOpen = (event: Event) => void
+export type OnError = (event: Event) => void
+export type OnClose = (event: CloseEvent) => void
