@@ -1,19 +1,20 @@
-import { createWebSocket, Decode, Encode } from '../../src'
+import { createWebSocket, Decode, Encode, DecodedPacket } from '../../index'
 
 const encode: Encode = (action, data) => {
-  return Buffer.from(JSON.stringify([action, data]))
+  return JSON.stringify([action, data])
 }
 
-const decode: Decode = data => {
+const decode: Decode = packet => {
   try {
-    const packet = JSON.parse(new Uint8Array(data).join(''))
-    if (Array.isArray(packet)) {
-      return packet
+    const decodedPacket = JSON.parse(new Uint8Array(packet).join(''))
+    if (Array.isArray(decodedPacket)) {
+      const [action, ...data] = decodedPacket
+      return { action, data }
     } else {
-      return []
+      return {} as DecodedPacket
     }
   } catch {
-    return []
+    return {} as DecodedPacket
   }
 }
 

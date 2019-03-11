@@ -1,8 +1,12 @@
 import { ExoticComponent, ConsumerProps } from 'react'
 
 export type Packet = string | ArrayBufferLike | Blob | ArrayBufferView
-export type Encode = (...args: any[]) => Packet
-export type Decode = (packet: ArrayBuffer) => any[]
+export type Encode = (action: any, ...args: any[]) => Packet
+export type Decode = (packet: ArrayBuffer) => DecodedPacket
+export interface DecodedPacket {
+  readonly action: any
+  readonly data: any[]
+}
 
 export interface Option {
   readonly encode: Encode

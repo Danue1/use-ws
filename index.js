@@ -3,10 +3,8 @@ import React, { createContext, useContext, useEffect, useState, createElement } 
 
 export const createWebSocket = ({ encode, decode }) => {
   const Context = createContext({})
-
   const event = new EventEmitter()
-  const broadcastStack = []
-
+  const pendingQueue = []
   const Provider = ({
     url,
     middleware,
@@ -24,29 +22,28 @@ export const createWebSocket = ({ encode, decode }) => {
       if (currentWebSocket) {
         return
       }
-
       const nextWebSocket = new WebSocket(url)
       nextWebSocket.binaryType = 'arraybuffer'
-
       nextWebSocket.onerror = onError
       nextWebSocket.onclose = onClose
-      nextWebSocket.onmessage = ({ data }) => {
-        const [action, ...args] = decode(data)
-        if (middleware) {
-          middleware(action, ...args)
+      nextWebSocket.onmessage = ({ data: packet }) => {
+        const { action, data } = decode(packet)
+        if (!action) {
+          return
         }
-        event.emit(action, ...args)
+        if (middleware) {
+          middleware(action, ...data)
+        }
+        event.emit(action, ...data)
       }
       nextWebSocket.onopen = () => {
-        broadcastStack.forEach(packet => nextWebSocket.send(packet))
+        pendingQueue.forEach(packet => nextWebSocket.send(packet))
         setCurrentWebSocket(nextWebSocket)
       }
     }
-
     useEffect(createWebSocket, [currentWebSocket])
 
     const isBroadcastable = () => !!currentWebSocket && currentWebSocket.readyState === currentWebSocket.OPEN
-
     const context = {
       clear(action, handler) {
         event.removeListener(action, handler)
@@ -60,12 +57,12 @@ export const createWebSocket = ({ encode, decode }) => {
         event.once(action, handler)
         return this
       },
-      broadcast(...data) {
-        const packet = encode(...data)
+      broadcast(action, ...data) {
+        const packet = encode(action, ...data)
         if (isBroadcastable()) {
           currentWebSocket.send(packet)
         } else {
-          broadcastStack.push(packet)
+          pendingQueue.push(packet)
         }
         return this
       },

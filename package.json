@@ -1,6 +1,6 @@
 {
   "name": "use-ws",
-  "version": "0.2.5",
+  "version": "0.3.2",
   "description": "A pretty custom hooks for websocket and react",
   "license": "MIT",
   "main": "./index.ts",
