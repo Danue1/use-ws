@@ -1,0 +1,45 @@
+{
+  "name": "use-ws",
+  "version": "0.2.5",
+  "description": "A pretty custom hooks for websocket and react",
+  "license": "MIT",
+  "main": "./index.ts",
+  "typings": "./index.d.ts",
+  "dependencies": {
+    "eventemitter3": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/eventemitter3": "^2.0.2",
+    "@types/react": "^16.8.7",
+    "tslint": "^5.13.1",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-config-standard": "^8.0.1",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.3.3333"
+  },
+  "bugs": {
+    "url": "https://github.com/Danue1/human/issues"
+  },
+  "keywords": [
+    "react",
+    "react-dom",
+    "websocket",
+    "react-hooks",
+    "hooks",
+    "custom hooks",
+    "react-websocket",
+    "event",
+    "events",
+    "emitter",
+    "event-emitter",
+    "react-event",
+    "subscribe",
+    "publish",
+    "listener",
+    "event-listener",
+    "once",
+    "emit",
+    "addListener",
+    "addEventListener"
+  ]
+}
