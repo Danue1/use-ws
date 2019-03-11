@@ -37,17 +37,17 @@ export interface Props {
 
 export type Handler = (...args: any[]) => void
 export type Handle = (action: any, handler: Handler) => Context
-export type Clear = Handle
-export type message = Handle
-export type messageOnce = Handle
-export type Broadcast = (...data: any[]) => Context
+export type Remove = Handle
+export type Receive = Handle
+export type ReceiveOnce = Handle
+export type Request = (...data: any[]) => Context
 export type Refresh = () => void
 
 export interface Context {
-  readonly clear: Clear
-  readonly message: message
-  readonly messageOnce: messageOnce
-  readonly broadcast: Broadcast
+  readonly remove: Remove
+  readonly receive: Receive
+  readonly receiveOnce: ReceiveOnce
+  readonly request: Request
   readonly refresh: Refresh
 }
 

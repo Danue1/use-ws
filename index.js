@@ -43,19 +43,19 @@ export const createWebSocket = ({ binaryType, encode, decode }) => {
 
     const isBroadcastable = () => !!currentWebSocket && currentWebSocket.readyState === currentWebSocket.OPEN
     const context = {
-      clear(action, handler) {
+      remove(action, handler) {
         event.removeListener(action, handler)
         return this
       },
-      message(action, handler) {
+      receive(action, handler) {
         event.addListener(action, handler)
         return this
       },
-      messageOnce(action, handler) {
+      receiveOnce(action, handler) {
         event.once(action, handler)
         return this
       },
-      broadcast(action, ...data) {
+      request(action, ...data) {
         const packet = encode(action, ...data)
         if (isBroadcastable()) {
           currentWebSocket.send(packet)

@@ -12,10 +12,10 @@ export const User: FC = () => {
       setName(name)
     }
 
-    websocket.messageOnce(Action, getUserName).broadcast(Action)
+    websocket.receiveOnce(Action, getUserName).request(Action)
 
     return () => {
-      websocket.clear(Action, getUserName)
+      websocket.remove(Action, getUserName)
     }
   }, [])
 
