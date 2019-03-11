@@ -1,16 +1,25 @@
 import { ExoticComponent, ConsumerProps } from 'react'
 
+export enum PacketType {
+  ArrayBuffer = 'ArrayBuffer',
+  Blob = 'Blob'
+}
+
 export type Packet = string | ArrayBufferLike | Blob | ArrayBufferView
 export type Encode = (action: any, ...args: any[]) => Packet
-export type Decode = (packet: ArrayBuffer) => DecodedPacket
+export type Decode<BinaryType extends PacketType> = (
+  packet: string | (BinaryType extends PacketType.ArrayBuffer ? ArrayBuffer : Blob)
+) => DecodedPacket
+
 export interface DecodedPacket {
   readonly action: any
   readonly data: any[]
 }
 
-export interface Option {
+export interface Option<BinaryType extends PacketType> {
+  readonly binaryType: BinaryType
   readonly encode: Encode
-  readonly decode: Decode
+  readonly decode: Decode<BinaryType>
 }
 
 export type Middleware = (action: string, ...data: any[]) => void
@@ -40,8 +49,8 @@ export interface Context {
   readonly refresh: Refresh
 }
 
-export const createWebSocket: (
-  option: Option
+export const createWebSocket: <BinaryType extends PacketType>(
+  option: Option<BinaryType>
 ) => {
   readonly useWebSocket: () => Context
   readonly Consumer: ExoticComponent<ConsumerProps<Context>>

@@ -1,7 +1,12 @@
 import { EventEmitter } from 'eventemitter3'
 import React, { createContext, useContext, useEffect, useState, createElement } from 'react'
 
-export const createWebSocket = ({ encode, decode }) => {
+export const PacketType = {
+  ArrayBuffer: 'ArrayBuffer',
+  Blob: 'Blob'
+}
+
+export const createWebSocket = ({ binaryType, encode, decode }) => {
   const Context = createContext({})
   const event = new EventEmitter()
   const pendingQueue = []
@@ -23,7 +28,7 @@ export const createWebSocket = ({ encode, decode }) => {
         return
       }
       const nextWebSocket = new WebSocket(url)
-      nextWebSocket.binaryType = 'arraybuffer'
+      nextWebSocket.binaryType = binaryType
       nextWebSocket.onerror = onError
       nextWebSocket.onclose = onClose
       nextWebSocket.onmessage = ({ data: packet }) => {
