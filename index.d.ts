@@ -23,12 +23,14 @@ export interface Option<BinaryType extends PacketType> {
 }
 
 export type Middleware = (action: string, ...data: any[]) => void
+export type OnOpen = (event: Event) => void
 export type OnError = (event: Event) => void
 export type OnClose = (event: CloseEvent) => void
 
 export interface Props {
   readonly url: string
   readonly middleware?: Middleware
+  readonly onOpen?: OnOpen
   readonly onError?: OnError
   readonly onClose?: OnClose
 }

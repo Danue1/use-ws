@@ -10,17 +10,7 @@ export const createWebSocket = ({ binaryType, encode, decode }) => {
   const Context = createContext({})
   const event = new EventEmitter()
   const pendingQueue = []
-  const Provider = ({
-    url,
-    middleware,
-    onError = () => {
-      //
-    },
-    onClose = () => {
-      //
-    },
-    children
-  }) => {
+  const Provider = ({ url, middleware, onOpen = () => {}, onError = () => {}, onClose = () => {}, children }) => {
     const [currentWebSocket, setCurrentWebSocket] = useState(null)
 
     const createWebSocket = () => {
@@ -44,6 +34,9 @@ export const createWebSocket = ({ binaryType, encode, decode }) => {
       nextWebSocket.onopen = () => {
         pendingQueue.forEach(packet => nextWebSocket.send(packet))
         setCurrentWebSocket(nextWebSocket)
+      }
+      if (onOpen) {
+        nextWebSocket.addEventListener('open', onOpen)
       }
     }
     useEffect(createWebSocket, [currentWebSocket])
