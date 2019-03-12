@@ -17,34 +17,34 @@ export const createWebSocket: <Binary extends BinaryKind>(
 
 export interface Option<Binary extends BinaryKind> {
   readonly binaryType: Binary
-  readonly encode: Encode
-  readonly decode: Decode<Binary>
+  readonly serialize: Serialize
+  readonly deserialize: Deserialize<Binary>
 }
 
-export type Encode = (action: any, ...args: any[]) => string | ArrayBufferLike | Blob | ArrayBufferView
-export type Decode<Binary extends BinaryKind> = (
+export type Serialize = (action: any, ...args: any[]) => string | ArrayBufferLike | Blob | ArrayBufferView
+export type Deserialize<Binary extends BinaryKind> = (
   packet: string | (Binary extends 'arraybuffer' ? ArrayBuffer : Blob)
-) => void | DecodedPacket
-export interface DecodedPacket {
+) => void | SerializedPacket
+export interface SerializedPacket {
   readonly action: any
   readonly data: any[]
 }
 
 export interface WebSocketContext {
-  readonly remove: Remove
-  readonly receive: Receive
-  readonly receiveOnce: ReceiveOnce
-  readonly request: Request
-  readonly refresh: Refresh
+  readonly removeListener: RemoveListener
+  readonly addListener: AddListener
+  readonly once: Once
+  readonly emit: Emit
+  readonly reconnect: Reconnect
 }
 
 export type Handler = (...args: any[]) => void
 export type Handle = (action: any, handler: Handler) => WebSocketContext
-export type Remove = Handle
-export type Receive = Handle
-export type ReceiveOnce = Handle
-export type Request = (...data: any[]) => WebSocketContext
-export type Refresh = () => void
+export type RemoveListener = Handle
+export type AddListener = Handle
+export type Once = Handle
+export type Emit = (...data: any[]) => WebSocketContext
+export type Reconnect = () => void
 
 export interface Props {
   readonly url: string

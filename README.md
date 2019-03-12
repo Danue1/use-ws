@@ -19,12 +19,12 @@ yarn add use-ws
 ```tsx
 import React, { FC, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
-import { createWebSocket } from 'use-ws'
+import { createWebSocket, BinaryType } from 'use-ws'
 
 const { WebSocketProvider, useWebSocket } = createWebSocket({
-  binaryType: 'arraybuffer', // or 'blob'
-  encode(action, ...data) { ... },
-  decode(packet) { ... }
+  binaryType: BinaryType.ArrayBuffer, // or BinaryType.Blob
+  serialize(action, ...data) { ... },
+  deserialize(packet) { ... }
 })
 
 const App: FC = () => (
@@ -41,17 +41,18 @@ const App: FC = () => (
 
 const User: FC = () => {
   const websocket = useWebSocket()
+  const [id, setId] = useState<string>('')
   const [name, setName] = useState<string>('')
 
   useEffect(() => {
     const handler = (foo: string, bar?: number) => { ... }
 
-    websocket
-      .receive(YOUR_ACTION_CODE, handler)
-      .request(YOUR_ACTION_CODE)
+    websocket.addListener(YOUR_ACTION_CODE, handler)
+    websocket.once(YOUR_ACTION_CODE, handler)
+    websocket.emit(YOUR_ACTION_CODE, parameter0, parameter1)
 
     return () => {
-      websocket.remove(YOUR_ACTION_CODE, handler)
+      websocket.removeListener(YOUR_ACTION_CODE, handler)
     }
   }, [])
 
@@ -61,6 +62,6 @@ const User: FC = () => {
 ReactDOM.render(<App />, document.getElementById('root'))
 ```
 
-# Lince
+# Lincense
 
 [MIT](./LICENSE)
