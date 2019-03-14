@@ -22,9 +22,16 @@ import ReactDOM from 'react-dom'
 import { createWebSocket, BinaryType } from 'use-ws'
 
 const WebSocket = createWebSocket({
+  // required
   binaryType: BinaryType.ArrayBuffer, // or BinaryType.Blob
   serialize(action, ...data) { ... },
-  deserialize(packet) { ... }
+  deserialize(packet) { ... },
+  // optional
+  heartbeat: {
+    interval: 10 * 1000,
+    action: YOUR_HEARTBEAT_CODE,
+    data: [] // optional
+  }
 })
 const { WebSocketProvider, WebSocketContext, useWebSocket, useHeartbeat } = WebSocket
 
@@ -42,9 +49,11 @@ const App: FC = () => (
 
 const User: FC = () => {
   const websocket = useWebSocket()
+  const { latestHeartbeat, setData, setNextDelay } = useHeartbeat()
   const [id, setId] = useState<string>('')
   const [name, setName] = useState<string>('')
 
+  // listener settings
   useEffect(() => {
     const handler = (foo: string, bar?: number) => { ... }
 
@@ -56,6 +65,15 @@ const User: FC = () => {
       websocket.removeListener(YOUR_ACTION_CODE, handler)
     }
   }, [])
+
+  // add 100ms per heartbeat
+  useEffect(() => {
+    setNextDelay(previousDelay => {
+      const nextDelay = previousDelay + 100
+      setData(nextDelay)
+      return nextDelay
+    })
+  }, [latestHeartbeat])
 
   return <div>{name}</div>
 }

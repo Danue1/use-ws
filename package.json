@@ -1,12 +1,13 @@
 {
   "name": "use-ws",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "A pretty custom hooks for websocket and react",
   "license": "MIT",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "scripts": {
-    "compile": "tsc ./src/index.ts --jsx react --declaration --outDir ./dist"
+    "compile": "tsc ./src/index.ts --jsx react --declaration --outDir ./dist",
+    "publish": "npm run compile && npm publish"
   },
   "dependencies": {
     "eventemitter3": "^3.1.0"
