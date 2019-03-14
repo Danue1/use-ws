@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { EventEmitter } from 'eventemitter3'
-import { createContext, useContext, useEffect, useState, FC } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, FC } from 'react'
 
 export type Action = string | number
 
@@ -10,6 +10,7 @@ export interface Option<BK extends BinaryKind> {
   readonly binaryType: BK
   readonly serialize: Serialize
   readonly deserialize: Deserialize<BK>
+  readonly heartbeat: HeartbeatOption | null
 }
 
 export type Packet = string | ArrayBufferLike | Blob | ArrayBufferView
@@ -20,6 +21,18 @@ export type Deserialize<BK extends BinaryKind> = (
 export interface SerializedPacket {
   readonly action: Action
   readonly data: any[]
+}
+
+export interface HeartbeatOption {
+  readonly interval: number
+  readonly action: Action
+  readonly data?: any[]
+}
+
+export interface HeartbeatContext {
+  readonly latestHeartbeat: null | Date
+  readonly setNextDelay: (nextDelay: number | ((previous: number) => number)) => void
+  readonly setData: (...data: any[]) => void
 }
 
 export interface WebSocketContext {
@@ -51,7 +64,12 @@ export type OnOpen = (event: Event) => void
 export type OnError = (event: Event) => void
 export type OnClose = (event: CloseEvent) => void
 
-export const createWebSocket = <BK extends BinaryKind>({ binaryType, serialize, deserialize }: Option<BK>) => {
+export const createWebSocket = <BK extends BinaryKind>({
+  binaryType,
+  serialize,
+  deserialize,
+  heartbeat
+}: Option<BK>) => {
   const Context = createContext<WebSocketContext>({} as WebSocketContext)
   const event = new EventEmitter()
   const pendingQueue: Packet[] = []
@@ -128,12 +146,67 @@ export const createWebSocket = <BK extends BinaryKind>({ binaryType, serialize, 
       }
     }
 
-    return <Context.Provider value={context}>{children}</Context.Provider>
+    return (
+      <Context.Provider value={context}>
+        <HeartbeatProvider option={heartbeat}>{children}</HeartbeatProvider>
+      </Context.Provider>
+    )
+  }
+
+  const HeartbeatContext = createContext<HeartbeatContext>(([] as any) as HeartbeatContext)
+
+  const useHeartbeat = () => useContext(HeartbeatContext)
+
+  const HeartbeatProvider: FC<{ readonly option: null | HeartbeatOption }> = ({ option, children }) => {
+    const websocket = useWebSocket()
+
+    const [action] = useState(option && option.action)
+    const [, setData] = useState((option && option.data) || [])
+    const [latestHeartbeat, setLatestHeartbeat] = useState<null | Date>(null)
+    const [nextDelay, setNextDelay] = useState<number>(option ? option.interval : 0)
+    const [, setTimer] = useState<number>(0)
+
+    const sendPing = () => {
+      setData(data => {
+        websocket.emit(action, ...data)
+        setLatestHeartbeat(new Date())
+        return data
+      })
+    }
+
+    const sendHeartbeat = () => {
+      if (nextDelay) {
+        setTimer(window.setInterval(sendPing, nextDelay))
+      }
+    }
+    useEffect(sendHeartbeat, [])
+
+    const createContext = (): HeartbeatContext => ({
+      latestHeartbeat,
+      setNextDelay(nextDelayGetter) {
+        setNextDelay(previousDelay => {
+          const delay = typeof nextDelayGetter === 'number' ? nextDelayGetter : nextDelayGetter(previousDelay)
+          setTimer(timer => {
+            clearTimeout(timer)
+            return window.setInterval(sendPing, delay)
+          })
+          return delay
+        })
+      },
+      setData(...data: any[]) {
+        setData(data)
+      }
+    })
+
+    const context = useMemo(createContext, [latestHeartbeat])
+
+    return <HeartbeatContext.Provider value={context}>{children}</HeartbeatContext.Provider>
   }
 
   return {
-    useWebSocket,
+    WebSocketProvider,
     WebSocketConsumer: Context.Consumer,
-    WebSocketProvider
+    useWebSocket,
+    useHeartbeat
   }
 }
