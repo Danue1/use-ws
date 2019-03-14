@@ -1,16 +1,19 @@
 {
   "name": "use-ws",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "A pretty custom hooks for websocket and react",
   "license": "MIT",
-  "main": "./index.ts",
-  "typings": "./index.d.ts",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "scripts": {
+    "compile": "tsc ./src/index.ts --jsx react --declaration --outDir ./dist"
+  },
   "dependencies": {
     "eventemitter3": "^3.1.0"
   },
   "homepage": "https://github.com/Danue1/use-ws",
   "repository": "Danue1/use-ws",
-  "bugs": "https://github.com/Danue1/human/issues",
+  "bugs": "https://github.com/Danue1/use-ws/issues",
   "keywords": [
     "react",
     "react-dom",
@@ -31,6 +34,14 @@
     "once",
     "emit",
     "addListener",
-    "addEventListener"
-  ]
+    "addEventListener",
+    "ping",
+    "pong",
+    "pingpong",
+    "heartbeat"
+  ],
+  "devDependencies": {
+    "@types/react": "^16.8.8",
+    "typescript": "^3.3.3333"
+  }
 }

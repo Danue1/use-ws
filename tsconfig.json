@@ -4,8 +4,9 @@
     "module": "esnext",
     "target": "es6",
     "lib": ["dom", "es6", "es7", "es2017", "esnext"],
-    "sourceMap": true,
-    "jsx": "preserve",
+    "sourceMap": false,
+    "jsx": "react",
+    "declaration": true,
     "allowJs": true,
     "moduleResolution": "node",
     "skipLibCheck": true,
@@ -18,11 +19,12 @@
     "noUnusedLocals": true,
     "removeComments": false,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": false,
     "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": false,
     "noEmit": true
   },
-  "exclude": ["node_modules", "build", "scripts", "webpack", "config"]
+  "exclude": ["node_modules", "build", "scripts", "webpack", "config"],
+  "compileOnSave": true
 }
