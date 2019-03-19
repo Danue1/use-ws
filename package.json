@@ -7,7 +7,9 @@
   "typings": "./dist/index.d.ts",
   "scripts": {
     "compile": "tsc ./src/index.ts --jsx react --declaration --outDir ./dist",
-    "publish": "npm run compile && npm publish"
+    "clean": "rimraf dist",
+    "build": "npm run clean && npm run compile",
+    "publish": "npm run build && npm publish"
   },
   "dependencies": {
     "eventemitter3": "^3.1.0"
@@ -43,6 +45,7 @@
   ],
   "devDependencies": {
     "@types/react": "^16.8.8",
+    "rimraf": "^2.6.3",
     "typescript": "^3.3.3333"
   }
 }
