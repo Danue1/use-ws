@@ -77,10 +77,10 @@ export const createWebSocket = <BK extends BinaryKind>({
   const useWebSocket = () => useContext(Context)
 
   const WebSocketProvider: FC<Props> = ({ url, middleware, onOpen, onError = () => {}, onClose, children }) => {
-    const [currenetWebSocket, setCurrentWebSocket] = useState<null | WebSocket>(null)
+    const [currentWebSocket, setCurrentWebSocket] = useState<null | WebSocket>(null)
 
     const createWebSocket = () => {
-      if (currenetWebSocket) {
+      if (currentWebSocket) {
         return
       }
       const nextWebSocket = new WebSocket(url)
@@ -113,9 +113,9 @@ export const createWebSocket = <BK extends BinaryKind>({
         nextWebSocket.addEventListener('open', onOpen)
       }
     }
-    useEffect(createWebSocket, [currenetWebSocket])
+    useEffect(createWebSocket, [currentWebSocket])
 
-    const isBroadcastable = () => !!currenetWebSocket && currenetWebSocket.readyState === currenetWebSocket.OPEN
+    const isBroadcastable = () => !!currentWebSocket && currentWebSocket.readyState === currentWebSocket.OPEN
     const createContext = (): WebSocketContext => ({
       removeListener(action, handler) {
         event.removeListener(action as string, handler)
@@ -132,7 +132,7 @@ export const createWebSocket = <BK extends BinaryKind>({
       emit(action, ...data) {
         const packet = serialize(action, ...data)
         if (isBroadcastable()) {
-          currenetWebSocket!.send(packet)
+          currentWebSocket!.send(packet)
         } else {
           pendingQueue.push(packet)
         }
@@ -140,13 +140,13 @@ export const createWebSocket = <BK extends BinaryKind>({
       },
       reconnect() {
         if (isBroadcastable()) {
-          currenetWebSocket!.close()
+          currentWebSocket!.close()
         }
         setCurrentWebSocket(null)
       }
     })
 
-    const context = useMemo(createContext, [currenetWebSocket])
+    const context = useMemo(createContext, [currentWebSocket])
 
     return (
       <Context.Provider value={context}>
