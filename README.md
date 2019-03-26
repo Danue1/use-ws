@@ -59,7 +59,7 @@ const User: FC = () => {
 
     websocket.addListener(YOUR_ACTION_CODE, handler)
     websocket.once(YOUR_ACTION_CODE, handler)
-    websocket.emit(YOUR_ACTION_CODE, parameter0, parameter1)
+    websocket.emit(parameter0, parameter1)
 
     return () => {
       websocket.removeListener(YOUR_ACTION_CODE, handler)

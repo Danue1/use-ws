@@ -2,7 +2,7 @@ import * as React from 'react'
 import { EventEmitter } from 'eventemitter3'
 import { createContext, useContext, useEffect, useMemo, useState, FC } from 'react'
 
-export type Action = string | number
+export type Action = string
 
 export type BinaryKind = 'arraybuffer' | 'blob'
 
@@ -10,11 +10,11 @@ export interface Option<BK extends BinaryKind> {
   readonly binaryType: BK
   readonly serialize: Serialize
   readonly deserialize: Deserialize<BK>
-  readonly heartbeat: HeartbeatOption | null
+  readonly heartbeat?: HeartbeatOption
 }
 
 export type Packet = string | ArrayBufferLike | Blob | ArrayBufferView
-export type Serialize = (action: Action, ...data: any[]) => Packet
+export type Serialize = (...data: any[]) => Packet
 export type Deserialize<BK extends BinaryKind> = (
   packet: string | (BK extends 'arraybuffer' ? ArrayBuffer : Blob)
 ) => void | SerializedPacket
@@ -77,12 +77,7 @@ export const createWebSocket = <BK extends BinaryKind>({
   const useWebSocket = () => useContext(Context)
 
   const WebSocketProvider: FC<Props> = ({ url, middleware, onOpen, onError = () => {}, onClose, children }) => {
-    const [currentWebSocket, setCurrentWebSocket] = useState<null | WebSocket>(null)
-
     const createWebSocket = () => {
-      if (currentWebSocket) {
-        return
-      }
       const nextWebSocket = new WebSocket(url)
       nextWebSocket.binaryType = binaryType
       nextWebSocket.onerror = onError
@@ -112,10 +107,11 @@ export const createWebSocket = <BK extends BinaryKind>({
       if (onOpen) {
         nextWebSocket.addEventListener('open', onOpen)
       }
+      return nextWebSocket
     }
-    useEffect(createWebSocket, [currentWebSocket])
+    const [currentWebSocket, setCurrentWebSocket] = useState<WebSocket>(createWebSocket)
 
-    const isBroadcastable = () => !!currentWebSocket && currentWebSocket.readyState === currentWebSocket.OPEN
+    const isBroadcastable = () => currentWebSocket.readyState === currentWebSocket.OPEN
     const createContext = (): WebSocketContext => ({
       removeListener(action, handler) {
         event.removeListener(action as string, handler)
@@ -129,8 +125,8 @@ export const createWebSocket = <BK extends BinaryKind>({
         event.once(action as string, handler)
         return this
       },
-      emit(action, ...data) {
-        const packet = serialize(action, ...data)
+      emit(...data) {
+        const packet = serialize(...data)
         if (isBroadcastable()) {
           currentWebSocket!.send(packet)
         } else {
@@ -142,7 +138,7 @@ export const createWebSocket = <BK extends BinaryKind>({
         if (isBroadcastable()) {
           currentWebSocket!.close()
         }
-        setCurrentWebSocket(null)
+        setCurrentWebSocket(createWebSocket())
       }
     })
 
@@ -159,7 +155,7 @@ export const createWebSocket = <BK extends BinaryKind>({
 
   const useHeartbeat = () => useContext(HeartbeatContext)
 
-  const HeartbeatProvider: FC<{ readonly option: null | HeartbeatOption }> = ({ option, children }) => {
+  const HeartbeatProvider: FC<{ readonly option?: HeartbeatOption }> = ({ option, children }) => {
     const websocket = useWebSocket()
 
     const [action] = useState(option && option.action)
