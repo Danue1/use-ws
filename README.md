@@ -21,7 +21,7 @@ import React, { FC, useEffect, useState } from 'react'
 import ReactDOM from 'react-dom'
 import { createWebSocket, BinaryType } from 'use-ws'
 
-const { WebSocketProvider, WebSocketContext, useWebSocket, useHeartbeat } = createWebSocket({
+const { WebSocketProvider, WebSocketConsumer, useWebSocket, useHeartbeat } = createWebSocket({
   // required
   binaryType: BinaryType.ArrayBuffer, // or BinaryType.Blob
   serialize(action, ...data) { ... },
